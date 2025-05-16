@@ -238,22 +238,21 @@ async def e(ctx, message_id: int, *emojis):
     try:
         target_msg = await channel.fetch_message(message_id)
         for em in emojis:
-            # 去除冒號，讓使用者可以輸入 "frog" 或 ":frog:"
             em_name = em.strip(':')
             emoji_obj = emoji_map.get(em_name)
-            emoji_to_use = emoji_obj or em  # 使用自訂 emoji 物件或原始文字
+            emoji_to_use = emoji_obj or em  # 使用自訂 emoji 物件或原始字串
 
-            # 檢查是否已加上此反應（由 bot 本身加的）
             already_reacted = False
             for reaction in target_msg.reactions:
-                if (
-                    (emoji_obj and reaction.emoji == emoji_obj) or
-                    (not emoji_obj and str(reaction.emoji) == em)
-                ):
-                    users = await reaction.users().flatten()
-                    if bot.user in users:
-                        already_reacted = True
-                        break
+                # reaction.emoji 是 Emoji 物件或字串
+                if (emoji_obj and isinstance(reaction.emoji, discord.Emoji) and reaction.emoji.id == emoji_obj.id) or \
+                   (not emoji_obj and str(reaction.emoji) == em):
+                    async for user in reaction.users():
+                        if user == bot.user:
+                            already_reacted = True
+                            break
+                if already_reacted:
+                    break
 
             if already_reacted:
                 try:
@@ -265,6 +264,10 @@ async def e(ctx, message_id: int, *emojis):
                     await target_msg.add_reaction(emoji_to_use)
                 except Exception as e:
                     print(f"❌ 無法加反應：{e}")
+
+    except Exception as e:
+        print(f"❌ 取得訊息或反應出錯：{e}")
+
 
 # 監聽圖片並轉貼到指定頻道，且刪除原始訊息
 @bot.event
