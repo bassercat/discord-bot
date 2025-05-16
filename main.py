@@ -112,21 +112,27 @@ async def start_webserver():
 
 #==========擋RANDER==========
 async def keep_alive_ping():
-    await bot.wait_until_ready()
+    await bot.wait_until_ready()  # 等待機器人連線完成
     while not bot.is_closed():
         try:
-            guild = bot.get_guild(A_GUILD_ID)
+            # 找一個頻道（改成你自己伺服器有權限的頻道ID或名稱）
+            guild = bot.get_guild(A_GUILD_ID)  # 例如伺服器A的ID
             if guild:
-                channel = guild.get_channel(1333115184981479456[guild.id])
+                channel = guild.get_channel(1333115184981479456[guild.id])  # 你的指令頻道ID或物件
                 if not channel:
+                    # 找不到用第一個文字頻道代替
                     channel = next((ch for ch in guild.channels if ch.type.name == 'text'), None)
+
                 if channel:
+                    # 取最新一則訊息，當作ping用
                     async for msg in channel.history(limit=1):
-                        pass
+                        pass  # 什麼都不做，純粹呼叫API保持活躍
+
             print("🟢 Keep-alive ping 執行成功")
         except Exception as e:
             print(f"❌ Keep-alive ping 發生錯誤：{e}")
-        await asyncio.sleep(600)
+
+        await asyncio.sleep(600)  # 等10分鐘 (=600秒) 再繼續下一次
 #==========擋RANDER==========
 
 # 白名單
