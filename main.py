@@ -20,8 +20,9 @@ import pytz
 import aiohttp
 from io import BytesIO
 import os
-#擋RANDER
+#==========擋RANDER==========
 from aiohttp import web
+#==========擋RANDER==========
 
 # 禁用語音套件警告
 discord.VoiceClient.warn_nacl = False
@@ -42,7 +43,7 @@ def get_channel_by_name_or_id(guild, identifier):
     else:
         return discord.utils.get(guild.text_channels, name=identifier)
 
-# ===== 🛠️ 自訂設定區 =====
+# ===== 🛠️ 自訂設定區 ==============================
 # 允許使用指令的成員ID清單
 ALLOWED_USER_IDS = [
     358124858552614912
@@ -90,12 +91,12 @@ DAILY_MESSAGE_MINUTE = 0  # 預設0分
 
 # 是否啟用定時訊息功能（預設為 False）
 ENABLE_DAILY_MESSAGE = False
-# =========================
+# ==================================================
 
 # 建立機器人
 bot = commands.Bot(command_prefix='/', intents=intents)
 
-#擋RANDER
+#==========擋RANDER==========
 async def handle(request):
     return web.Response(text="I'm alive!")
 
@@ -107,6 +108,7 @@ async def start_webserver():
     site = web.TCPSite(runner, '0.0.0.0', 8080)  # 監聽0.0.0.0，端口8080（Render要求）
     await site.start()
     print("Web server started on port 8080")
+#==========擋RANDER==========
 
 # 白名單
 def is_allowed_user():
