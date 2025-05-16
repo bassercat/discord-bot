@@ -20,6 +20,8 @@ import pytz
 import aiohttp
 from io import BytesIO
 import os
+#擋RANDER
+from aiohttp import web
 
 # 禁用語音套件警告
 discord.VoiceClient.warn_nacl = False
@@ -92,6 +94,19 @@ ENABLE_DAILY_MESSAGE = False
 
 # 建立機器人
 bot = commands.Bot(command_prefix='/', intents=intents)
+
+#擋RANDER
+async def handle(request):
+    return web.Response(text="I'm alive!")
+
+async def start_webserver():
+    app = web.Application()
+    app.router.add_get('/', handle)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 8080)  # 監聽0.0.0.0，端口8080（Render要求）
+    await site.start()
+    print("Web server started on port 8080")
 
 # 白名單
 def is_allowed_user():
@@ -294,9 +309,12 @@ async def on_message(message):
 # RANDER環境變數
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-# 啟動機器人（用 await 以相容 Colab）# 用 TOKEN 啟動 bot
+# main() 函式裡面加這行同時啟動機器人跟web server
 async def main():
-    await bot.start(TOKEN)
+    await asyncio.gather(
+        bot.start(TOKEN),
+        start_webserver()
+    )
 
 if __name__ == "__main__":
     asyncio.run(main())
