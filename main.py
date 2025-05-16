@@ -19,6 +19,7 @@ from datetime import datetime
 import pytz
 import aiohttp
 from io import BytesIO
+import os
 
 # 禁用語音套件警告
 discord.VoiceClient.warn_nacl = False
@@ -290,11 +291,10 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
+# RANDER環境變數
+TOKEN = os.getenv("DISCORD_TOKEN")
 
-# 🔐 輸入你的機器人 TOKEN
-TOKEN = 'MTM3MjQzOTkzMDM5OTEwMDk0MQ.GZ9Z39.ECf6rIJv9-BdkWKnPk81cbuGSHq8R7Ynw_egpo'
-
-# 啟動機器人（用 await 以相容 Colab）
+# 啟動機器人（用 await 以相容 Colab）# 用 TOKEN 啟動 bot
 async def main():
     await bot.start(TOKEN)
 
