@@ -182,7 +182,11 @@ async def on_ready():
     print(f'✅ 機器人已上線：{bot.user}')
     activity = discord.CustomActivity(name=CUSTOM_ACTIVITY_TEXT)
     await bot.change_presence(status=discord.Status.online, activity=activity)
-    # 啟動每日定時任務（只有在啟用時）
+
+    # ✅ 啟動 keep-alive
+    bot.loop.create_task(keep_alive_ping())
+    
+    # ✅ 啟動每日定時任務（只有在啟用時）
     if ENABLE_DAILY_MESSAGE and not daily_message_task.is_running():
         daily_message_task.start()
 
@@ -353,8 +357,6 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 
 # main() 函式裡面加這行同時啟動機器人跟web server
 async def main():
-    # 啟動背景任務
-    bot.loop.create_task(keep_alive_ping())
     # 同時啟動機器人跟web server
     await asyncio.gather(
         bot.start(TOKEN),
