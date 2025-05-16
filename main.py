@@ -295,4 +295,8 @@ async def on_message(message):
 TOKEN = 'MTM3MjQzOTkzMDM5OTEwMDk0MQ.GZ9Z39.ECf6rIJv9-BdkWKnPk81cbuGSHq8R7Ynw_egpo'
 
 # 啟動機器人（用 await 以相容 Colab）
-await bot.start(TOKEN)
+async def main():
+    await bot.start(TOKEN)
+
+if __name__ == "__main__":
+    asyncio.run(main())
