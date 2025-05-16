@@ -241,14 +241,30 @@ async def e(ctx, message_id: int, *emojis):
             # 去除冒號，讓使用者可以輸入 "frog" 或 ":frog:"
             em_name = em.strip(':')
             emoji_obj = emoji_map.get(em_name)
-            if emoji_obj:
-                # 找到伺服器自訂 emoji，使用物件加入反應
-                await target_msg.add_reaction(emoji_obj)
+            emoji_to_use = emoji_obj or em  # 使用自訂 emoji 物件或原始文字
+
+            # 檢查是否已加上此反應（由 bot 本身加的）
+            already_reacted = False
+            for reaction in target_msg.reactions:
+                if (
+                    (emoji_obj and reaction.emoji == emoji_obj) or
+                    (not emoji_obj and str(reaction.emoji) == em)
+                ):
+                    users = await reaction.users().flatten()
+                    if bot.user in users:
+                        already_reacted = True
+                        break
+
+            if already_reacted:
+                try:
+                    await target_msg.remove_reaction(emoji_to_use, bot.user)
+                except Exception as e:
+                    print(f"❌ 無法移除反應：{e}")
             else:
-                # 否則嘗試用原字串當 Unicode emoji 加反應
-                await target_msg.add_reaction(em)
-    except Exception as e:
-        print(f"❌ 加反應失敗：{e}")
+                try:
+                    await target_msg.add_reaction(emoji_to_use)
+                except Exception as e:
+                    print(f"❌ 無法加反應：{e}")
 
 # 監聽圖片並轉貼到指定頻道，且刪除原始訊息
 @bot.event
