@@ -110,6 +110,25 @@ async def start_webserver():
     print("Web server started on port 8080")
 #==========擋RANDER==========
 
+#==========擋RANDER==========
+async def keep_alive_ping():
+    await bot.wait_until_ready()
+    while not bot.is_closed():
+        try:
+            guild = bot.get_guild(A_GUILD_ID)
+            if guild:
+                channel = guild.get_channel(1333115184981479456[guild.id])
+                if not channel:
+                    channel = next((ch for ch in guild.channels if ch.type.name == 'text'), None)
+                if channel:
+                    async for msg in channel.history(limit=1):
+                        pass
+            print("🟢 Keep-alive ping 執行成功")
+        except Exception as e:
+            print(f"❌ Keep-alive ping 發生錯誤：{e}")
+        await asyncio.sleep(600)
+#==========擋RANDER==========
+
 # 白名單
 def is_allowed_user():
     async def predicate(ctx):
@@ -332,6 +351,9 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 
 # main() 函式裡面加這行同時啟動機器人跟web server
 async def main():
+    # 啟動背景任務
+    bot.loop.create_task(keep_alive_ping())
+    # 同時啟動機器人跟web server
     await asyncio.gather(
         bot.start(TOKEN),
         start_webserver()
