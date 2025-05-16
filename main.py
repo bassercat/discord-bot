@@ -8,7 +8,7 @@ Original file is located at
 """
 
 # 安裝需要的套件
-!pip install -q discord.py nest_asyncio
+#!pip install -q discord.py nest_asyncio
 
 # 匯入模組
 import nest_asyncio
