@@ -363,7 +363,7 @@ async def on_message(message):
     else:
             # 如果不是正確頻道，不執行抽卡也不紀錄冷卻
             return
-await bot.process_commands(message)  # 讓其他 command（如果有）能繼續正常執行
+    await bot.process_commands(message)  # 讓其他 command（如果有）能繼續正常執行
 
 #機率檢測 /prob
 @bot.command(name="prob")
