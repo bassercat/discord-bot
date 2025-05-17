@@ -375,9 +375,11 @@ async def show_prob(ctx):
     show_prob_text = f"目前抽卡機率設定：本期Pickup {', '.join(ssr_pickup)}\n"
     show_prob_text += f"抽卡次數{MANY_DRAW}次 CD{CD}秒\n"
     show_prob_text += f"R:{prob_R*100:.0f}% SR:{prob_SR*100:.0f}% SSR:{prob_SSR*100:.0f}%\n"
-    show_prob_text += f"SSR個別機率 Pickup:{ssr_pickup_prob*100:.0f}% 朝聖超標準:{ssr_pilgrims_prob*100:.1f}% 剩餘SSR:{ssr_others_prob*100:.1f}%\n"
+    show_prob_text += f"SSR個別機率 Pickup:{ssr_pickup_prob*100:.0f}%\n"
+    show_prob_text += f"朝聖超標準:{ssr_pilgrims_prob*100:.1f}% 剩餘SSR:{ssr_others_prob*100:.1f}%\n"
     show_prob_text += f"SSR總數 朝聖超標準共{total_ssr_pilgrims}隻 剩餘SSR共{total_ssr_others}隻\n"
-    show_prob_text += f"平均每隻朝聖超標準機率為{ssr_pilgrims_prob/total_ssr_pilgrims*100:.4f}% 每隻剩餘SSR機率為{ssr_others_prob/total_ssr_others*100:.4f}%\n"
+    show_prob_text += f"平均每隻朝聖超標準機率為{ssr_pilgrims_prob/total_ssr_pilgrims*100:.4f}%\n"
+    show_prob_text += f"每隻剩餘SSR機率為{ssr_others_prob/total_ssr_others*100:.4f}%\n"
     await ctx.send(show_prob_text)
 
 
