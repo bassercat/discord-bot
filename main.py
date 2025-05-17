@@ -9,6 +9,12 @@ import discord
 from discord.ext import commands, tasks
 import asyncio
 import time
+import os
+import random
+from datetime import datetime
+import pytz
+from collections import Counter
+
 # 修補 Colab 的 asyncio loop 問題
 #nest_asyncio.apply()
 # 禁用語音套件警告
@@ -113,10 +119,6 @@ ssr_others_prob = 0.015
 
 # 建立機器人
 bot = commands.Bot(command_prefix='/', intents=intents)
-# 當機器人啟動時
-@bot.event
-async def on_ready():
-    print(f'✅ 機器人已上線：{bot.user}')
 
 
 
@@ -142,13 +144,10 @@ async def xranderC():
     await bot.wait_until_ready()
     while not bot.is_closed():
         try:
-            for guild_id, channel_identifier in S_COMMAND_CHANNELS.items():
-                guild = bot.get_guild(guild_id)
-                if guild:
-                    channel = get_channel_by_name_or_id(guild, channel_identifier)
-                    if channel:
-                        async for _ in channel.history(limit=1):
-                            pass  # fake request
+            channel = bot.get_channel(S_COMMAND_CHANNELS)
+            if channel:
+                async for _ in channel.history(limit=1):
+                    pass  # fake request
             print("10min ping")
         except Exception as e:
             print(f"{e}")
@@ -158,11 +157,14 @@ async def xranderC():
 
 
 
-# 靜默處理沒有權限錯誤（CheckFailure）
+# 靜默處理沒有權限 冷卻中 錯誤
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CheckFailure):
         # 沒權限就不回應任何訊息
+        return
+    elif isinstance(error, commands.CommandOnCooldown):
+        # 冷卻中也不回應任何訊息
         return
     else:
         raise error
@@ -278,8 +280,7 @@ async def e(ctx, message_id: int, *emojis):
 
 # 抽卡功能===========================================================================***
 
-# 用來記錄冷卻時間
-last_used = {}
+
 
 #模擬「抽卡」一張卡牌
 def draw_one_card():
@@ -300,26 +301,17 @@ def draw_one_card():
         else:
             return f"SSR (Others) {random.choice(ssr_others)}"
 
-async def on_message(message):
-    #防止機器人自己
-    if message.author.bot:
-        return
+# 使用commands.cooldown裝飾器
+# rate=1 : 1次
+# per=60 : 60秒冷卻 (你可以改成你想的秒數)
+# BucketType.user : 以使用者為單位冷卻
+            
+@bot.command(name="抽", aliases=["d"])
+@commands.cooldown(rate=1, per=CD, type=commands.BucketType.user) # 每位使用者冷卻CD秒只能執行1次
+async def 抽(ctx):
     #判斷訊息是否來自特定允許的頻道
-    if message.channel.id != ALLOWED_CHANNEL_ID:
+    if ctx.channel.id != DRAW_CHANNELS:
         return
-    #「抽」
-    if message.content.strip() != "抽":
-        return
-    #取得發訊者的使用者ID，及當前的時間戳記（秒）
-    user_id = message.author.id
-    now = time.time()
-    
-    # 檢查冷卻時間
-    if user_id in last_used and now - last_used[user_id] < CD:
-        return #還在冷卻，不執行
-
-    #更新該使用者最後一次使用指令的時間戳
-    last_used[user_id] = now # 紀錄本次使用時間
 
     results = [draw_one_card() for _ in range(10)] #一次抽10張卡
 
@@ -348,7 +340,7 @@ async def on_message(message):
     for name in sorted(ssr_counter):
         draw_text += f"{name} 共{ssr_counter[name]}隻\n"
     #送出
-    await message.channel.send(draw_text)
+    await ctx.send(draw_text)
 
 # =======================================================================
 
