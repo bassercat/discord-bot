@@ -126,7 +126,7 @@ async def xranderA(request):
 
 async def xranderB():
     app = web.Application()
-    app.router.add_get('/', handle)
+    app.router.add_get('/', xranderA)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', 8080)  # 監聽0.0.0.0，端口8080（Render要求）
