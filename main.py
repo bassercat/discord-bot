@@ -20,9 +20,9 @@ from collections import Counter
 # 禁用語音套件警告
 discord.VoiceClient.warn_nacl = False
 
-"""#==========擋RANDER========== aiohttp 網頁伺服器
+#==========擋RANDER========== aiohttp 網頁伺服器
 from aiohttp import web
-#==========擋RANDER========== aiohttp 網頁伺服器"""
+#==========擋RANDER========== aiohttp 網頁伺服器
 
 # 設定 Intents（允許讀取訊息內容）
 intents = discord.Intents.default()
@@ -123,7 +123,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 
 
-"""#==========擋RANDER========== aiohttp 網頁伺服器 xranderB
+#==========擋RANDER========== aiohttp 網頁伺服器 xranderB
 async def xranderA(request):
     return web.Response(text="dorororo")
 
@@ -135,7 +135,7 @@ async def xranderB():
     site = web.TCPSite(runner, '0.0.0.0', 8080)  # 監聽0.0.0.0，端口8080（Render要求）
     await site.start()
     print("Web server started on port 8080")
-#==========擋RANDER========== aiohttp 網頁伺服器 xranderB"""
+#==========擋RANDER========== aiohttp 網頁伺服器 xranderB
 
 
 
@@ -431,7 +431,7 @@ async def main():
     await asyncio.gather(
         bot.start(TOKEN),
 #==========擋RANDER========== aiohttp 網頁伺服器 xranderB
-#        xranderB()
+        xranderB()
 #==========擋RANDER========== aiohttp 網頁伺服器 xranderB
     )
 
