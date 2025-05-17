@@ -80,6 +80,7 @@ ENABLE_DAILY_MESSAGE = F
 # ============================== 🛠️ 自訂設定區 ==============================
 
 DRAW_CHANNELS = 1372912206127169596
+MANY_DRAW = 10
 CD = 60
 
 ssr_pickup = ["阿爾卡娜"]
@@ -313,7 +314,7 @@ async def 抽(ctx):
     if ctx.channel.id != DRAW_CHANNELS:
         return
 
-    results = [draw_one_card() for _ in range(10)] #一次抽10張卡
+    results = [draw_one_card() for _ in range(MANY_DRAW)] #一次抽MANY_DRAW張卡
 
     count_R = sum(1 for c in results if c == "R") #計算幾張R
     count_SR = sum(1 for c in results if c == "SR") #計算幾張SR
@@ -341,6 +342,25 @@ async def 抽(ctx):
         draw_text += f"{name} 共{ssr_counter[name]}隻\n"
     #送出
     await ctx.send(draw_text)
+
+
+
+#機率檢測 /prob
+@bot.command(name="prob")
+@is_allowed_user()
+async def show_prob(ctx):
+    if ctx.channel.id != DRAW_CHANNELS:
+        return
+    show_prob_text = ""
+    show_prob_text = f"目前抽卡機率設定：本期Pickup{ssr_pickup}\n"
+    show_prob_text += f"抽卡次數{MANY_DRAW}次 CD{CD}秒\n"
+    show_prob_text += f"R:{prob_R*100:.0f}% SR:{prob_SR*100:.0f}% SSR:{prob_SSR*100:.0f}%\n"
+    show_prob_text += f"SSR個別機率 Pickup:{ssr_pickup_prob*100:.0f}% 朝聖超標準:{ssr_pilgrims_prob*100:.0f}% 剩餘SSR:{ssr_others_prob*100:.0f}%\n"
+    show_prob_text += f"SSR總數 朝聖超標準共{total_ssr_pilgrims}隻 剩餘SSR共{total_ssr_others}隻\n"
+    show_prob_text += f"平均每隻朝聖超標準機率為{ssr_pilgrims_prob/total_ssr_pilgrims*100:.4f}% 每隻剩餘SSR機率為{ssr_others_prob/total_ssr_others*100:.4f}%\n"
+    await ctx.send(show_prob_text)
+
+
 
 # =======================================================================
 
