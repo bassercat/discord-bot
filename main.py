@@ -43,6 +43,25 @@ def is_allowed_user():
         return ctx.author.id in ALLOWED_USER_IDS
     return commands.check(predicate)
 
+#模擬「抽卡」一張卡牌
+def draw_one_card():
+    r = random.random() # 產生一個0~1之間的隨機浮點數
+    if r < prob_R:
+        return "R" # 如果r小於R卡機率，回傳"R"
+    elif r < prob_R + prob_SR:
+        return "SR" # 如果r介於R卡機率與R+SR機率之間，回傳"SR"
+    else:
+        r2 = random.random() # 如果都不符合R或SR，表示是SSR，開始第二次抽SSR內部分類
+        # 判斷是否是SSR裡的Pickup角色（按比例判斷）
+        if r2 < ssr_pickup_prob / prob_SSR:
+            return f"SSR (PICKUP) {random.choice(ssr_pickup)}"
+        # 判斷是否是SSR裡的Pilgrims角色
+        elif r2 < (ssr_pickup_prob + ssr_pilgrims_prob) / prob_SSR:
+            return f"SSR (Pilgrims) {random.choice(ssr_pilgrims)}"
+        # 剩下的SSR (Others) 角色隨機抽一個
+        else:
+            return f"SSR (Others) {random.choice(ssr_others)}"
+
 
 
 #============================== 🛠️ 自訂設定區 ==============================
@@ -281,69 +300,70 @@ async def e(ctx, message_id: int, *emojis):
 
 # 抽卡功能===========================================================================***
 
+# 用來記錄每位使用者的冷卻時間（只在特定頻道生效）
+user_cooldowns = {}
 
-
-#模擬「抽卡」一張卡牌
-def draw_one_card():
-    r = random.random() # 產生一個0~1之間的隨機浮點數
-    if r < prob_R:
-        return "R" # 如果r小於R卡機率，回傳"R"
-    elif r < prob_R + prob_SR:
-        return "SR" # 如果r介於R卡機率與R+SR機率之間，回傳"SR"
-    else:
-        r2 = random.random() # 如果都不符合R或SR，表示是SSR，開始第二次抽SSR內部分類
-        # 判斷是否是SSR裡的Pickup角色（按比例判斷）
-        if r2 < ssr_pickup_prob / prob_SSR:
-            return f"SSR (PICKUP) {random.choice(ssr_pickup)}"
-        # 判斷是否是SSR裡的Pilgrims角色
-        elif r2 < (ssr_pickup_prob + ssr_pilgrims_prob) / prob_SSR:
-            return f"SSR (Pilgrims) {random.choice(ssr_pilgrims)}"
-        # 剩下的SSR (Others) 角色隨機抽一個
-        else:
-            return f"SSR (Others) {random.choice(ssr_others)}"
-
-# 使用commands.cooldown裝飾器
-# rate=1 : 1次
-# per=60 : 60秒冷卻 (你可以改成你想的秒數)
-# BucketType.user : 以使用者為單位冷卻
-            
-@bot.command(name="抽", aliases=["d"])
-@commands.cooldown(rate=1, per=CD, type=commands.BucketType.member) # 每位使用者冷卻CD秒只能執行1次
-async def 抽(ctx):
-    #判斷訊息是否來自特定允許的頻道
-    if ctx.channel.id != DRAW_CHANNELS:
+@bot.event
+async def on_message(message):
+    if message.author.bot:
         return
+    # 判斷是否只輸入 "抽"
+    if message.content.strip() == "抽":
+        # 在正確頻道才執行抽卡，並啟用冷卻
+        if message.channel.id == DRAW_CHANNELS:
+            now = time.time()
+            user_id = message.author.id
 
-    results = [draw_one_card() for _ in range(MANY_DRAW)] #一次抽MANY_DRAW張卡
+            last_time = user_cooldowns.get(user_id, 0)
+            if now - last_time < CD:
+                return  # 還在冷卻中，什麼都不做
 
-    count_R = sum(1 for c in results if c == "R") #計算幾張R
-    count_SR = sum(1 for c in results if c == "SR") #計算幾張SR
+            user_cooldowns[user_id] = now  # 更新冷卻時間
 
-    ssr_cards = [] #存放所有 SSR 卡的名稱
-    for c in results:
-        if c.startswith("SSR"):
-            name = c.split()[-1]
-            ssr_cards.append(name)
+###### 使用commands.cooldown裝飾器
+###### rate=1 : 1次
+###### per=60 : 60秒冷卻 (你可以改成你想的秒數)
+###### BucketType.user : 以使用者為單位冷卻
+            
+#####@bot.command(name="抽", aliases=["d"])
+#####@commands.cooldown(rate=1, per=CD, type=commands.BucketType.member) # 每位使用者冷卻CD秒只能執行1次
+#####async def 抽(ctx):
+#####    #判斷訊息是否來自特定允許的頻道
+#####    if ctx.channel.id != DRAW_CHANNELS:
+#####        return
 
-    ssr_counter = Counter(ssr_cards) #計算每張SSR總數
+        results = [draw_one_card() for _ in range(MANY_DRAW)] #一次抽MANY_DRAW張卡
 
-    #整理訊息
-    draw_text = ""
-    draw_text = "十抽結果：\n"
-    draw_text += f"R 共{count_R}隻\n"
-    draw_text += f"SR 共{count_SR}隻\n"
+        count_R = sum(1 for c in results if c == "R") #計算幾張R
+        count_SR = sum(1 for c in results if c == "SR") #計算幾張SR
 
-    pickup_name = ssr_pickup[0]
-    if pickup_name in ssr_counter:
-        draw_text += f"{pickup_name} 共{ssr_counter[pickup_name]}隻\n"
-        del ssr_counter[pickup_name]
+        ssr_cards = [] #存放所有 SSR 卡的名稱
+        for c in results:
+            if c.startswith("SSR"):
+                name = c.split()[-1]
+                ssr_cards.append(name)
 
-    for name in sorted(ssr_counter):
-        draw_text += f"{name} 共{ssr_counter[name]}隻\n"
-    #送出
-    await ctx.send(draw_text)
+        ssr_counter = Counter(ssr_cards) #計算每張SSR總數
 
+        #整理訊息
+        draw_text = ""
+        draw_text = "十抽結果：\n"
+        draw_text += f"R 共{count_R}隻\n"
+        draw_text += f"SR 共{count_SR}隻\n"
 
+        pickup_name = ssr_pickup[0]
+        if pickup_name in ssr_counter:
+            draw_text += f"{pickup_name} 共{ssr_counter[pickup_name]}隻\n"
+            del ssr_counter[pickup_name]
+
+        for name in sorted(ssr_counter):
+            draw_text += f"{name} 共{ssr_counter[name]}隻\n"
+        #送出
+        await message.channel.send(draw_text)
+    else:
+            # 如果不是正確頻道，不執行抽卡也不紀錄冷卻
+            return
+await bot.process_commands(message)  # 讓其他 command（如果有）能繼續正常執行
 
 #機率檢測 /prob
 @bot.command(name="prob")
