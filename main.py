@@ -307,7 +307,7 @@ def draw_one_card():
 # BucketType.user : 以使用者為單位冷卻
             
 @bot.command(name="抽", aliases=["d"])
-@commands.cooldown(rate=1, per=CD, type=commands.BucketType.user) # 每位使用者冷卻CD秒只能執行1次
+@commands.cooldown(rate=1, per=CD, type=commands.BucketType.member) # 每位使用者冷卻CD秒只能執行1次
 async def 抽(ctx):
     #判斷訊息是否來自特定允許的頻道
     if ctx.channel.id != DRAW_CHANNELS:
