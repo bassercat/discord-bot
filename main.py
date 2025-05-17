@@ -138,7 +138,7 @@ ssr_others_prob = 0.015
 
 
 # 建立機器人
-bot = commands.Bot(command_prefix='/', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 
 
