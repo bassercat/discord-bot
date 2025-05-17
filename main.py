@@ -139,22 +139,22 @@ async def xranderB():
 
 
 
-"""#==========擋RANDER========== xranderC 10min ping
+#==========擋RANDER========== xranderC 10min ping
 
-async def xranderC():
-    await bot.wait_until_ready()
-    while not bot.is_closed():
-        try:
-            channel = bot.get_channel(S_COMMAND_CHANNELS)
-            if channel:
-                async for _ in channel.history(limit=1):
-                    pass  # fake request
-            print("10min ping")
-        except Exception as e:
-            print(f"{e}")
-        await asyncio.sleep(600)  # 每 10 分鐘
+#async def xranderC():
+#    await bot.wait_until_ready()
+#    while not bot.is_closed():
+#        try:
+#            channel = bot.get_channel(S_COMMAND_CHANNELS)
+#            if channel:
+#                async for _ in channel.history(limit=1):
+#                    pass  # fake request
+#            print("10min ping")
+#        except Exception as e:
+#            print(f"{e}")
+#        await asyncio.sleep(600)  # 每 10 分鐘
         
-#==========擋RANDER========== xranderC"""
+#==========擋RANDER========== xranderC
 
 
 
@@ -409,10 +409,10 @@ async def on_ready():
     activity = discord.CustomActivity(name=CUSTOM_ACTIVITY_TEXT)
     await bot.change_presence(status=discord.Status.online, activity=activity)
 
-"""#==========擋RANDER========== xranderC
+#==========擋RANDER========== xranderC
 # 啟動 xranderC
-    bot.loop.create_task(xranderC())
-#==========擋RANDER========== xranderC"""
+#    bot.loop.create_task(xranderC())
+#==========擋RANDER========== xranderC
 
 # 啟動每日定時任務（只有在啟用時）
     if ENABLE_DAILY_MESSAGE and not daily_message_task.is_running():
