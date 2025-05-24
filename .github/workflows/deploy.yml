@@ -1,0 +1,27 @@
+name: Deploy Bot
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup SSH agent
+      uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_KEY }}
+
+    - name: Copy bot to SBC
+      run: |
+        scp main.py ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/${{ secrets.USERNAME }}/main.py
+
+    - name: Run bot remotely
+      run: |
+        ssh ${{ secrets.USERNAME }}@${{ secrets.HOST }} "pkill -f main.py || true; nohup python3 /home/${{ secrets.USERNAME }}/main.py &"
